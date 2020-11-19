@@ -33,6 +33,7 @@ def main():
 		2.1, 2.2, 2.3
 	])
 	print(format(foo, "5.2f"))
+	# print(f"{foo :5.2f}") # Wow, on peut formater des matrices comme ça, c'est pas mal cool!
 
 	print("-" * 40)
 

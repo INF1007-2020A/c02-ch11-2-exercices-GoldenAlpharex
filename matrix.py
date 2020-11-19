@@ -47,7 +47,7 @@ class Matrix:
 		return self.__data
 
 	# TODO: Accès à un élément en lecture
-	def TODO(TODO):
+	def __getitem__(self, indexes):
 		"""
 		Indexation rangée-major
 
@@ -58,9 +58,10 @@ class Matrix:
 		if indexes[0] >= self.height or indexes[1] >= self.width:
 			raise IndexError()
 		# TODO: Retourner la valeur
+		return self.data[indexes[0] * self.height + indexes[1]]
 
 	# TODO: Affectation à un élément
-	def TODO(TODO):
+	def __setitem__(self, indexes, value):
 		"""
 		Indexation rangée-major
 
@@ -71,6 +72,7 @@ class Matrix:
 		if indexes[0] >= self.height or indexes[1] >= self.width:
 			raise IndexError()
 		# TODO: L'affectation
+		self.data[indexes[0] * self.height + indexes[1]] = value
 
 	def __len__(self):
 		"""
@@ -79,19 +81,38 @@ class Matrix:
 		return self.height * self.width
 
 	# TODO: Représentation affichable (conversion pour print)
-	def TODO(TODO):
+	def __str__(self):
 		# TODO: Chaque rangée est sur une ligne, avec chaque élément séparé d'un espace.
-		pass
+		# lines = []
+		# for i in range(self.height):
+		# 	line = " ".join([str(self[i, j]) for j in range(self.width)])
+		# 	lines.append(line)
+		# return "\n".join(lines)
+
+		return format(self, "") # Bein oui, aussi simple que ça.
+
+		# Je sais pas si ça marche:
+		# result = ""
+		# for i in range(self.height):
+		# 	for j in range(self.width):
+		# 		result += f"{self[i, j]} "
+		# 	result += "\n"
+		# return result
+			
 
 	# TODO: Représentation officielle
-	def TODO(TODO):
+	def __repr__(self):
 		# TODO: une string qui représente une expression pour construire l'objet.
-		pass
+		return f"Matrix({self.height}, {self.width}, {self.data.__repr__()})" # Mieux que juste self.data pour le dernier, plus reliable
 
 	# TODO: String formatée
-	def TODO(TODO):
+	def __format__(self, format_spec):
 		# TODO: On veut pouvoir dir comment chaque élément doit être formaté en passant la spécification de formatage qu'on passerait à `format()`
-		pass
+		lines = []
+		for i in range(self.height):
+			line = " ".join([format(self[i, j], format_spec) for j in range(self.width)])
+			lines.append(line)
+		return "\n".join(lines)
 
 	def clone(self):
 		return Matrix(self.height, self.width, self.data)
@@ -100,46 +121,77 @@ class Matrix:
 		return Matrix(self.height, self.width, copy.deepcopy(self.data))
 
 	def has_same_dimensions(self, other):
+		if not isinstance(other, Matrix):
+			raise TypeError()
 		return (self.height, self.width) == (other.height, other.width)
 
 	def __pos__(self):
 		return self.copy()
 
 	# TODO: Négation
-	def TODO(TODO):
-		pass
+	def __neg__(self):
+		return Matrix(self.height, self.width, [-e for e in self.data])
 
 	# TODO: Addition
-	def TODO(TODO):
-		pass
-	
+	def __add__(self, other): # other est l'opérande de droite
+		if not self.has_same_dimensions(other):
+			raise ValueError(Matrix)
+		# result = Matrix(self.height, self.width)
+		# for i in range(len(self)):
+		# 	result.data[i] = self.data[i] + other.data[i]
+		# return result
+		return Matrix(self.height, self.width, [e1 + e2 for e1, e2 in zip(self.data, other.data)])
+
 	# TODO: Soustraction
-	def TODO(TODO):
-		pass
+	def __sub__(self, other):
+		return self + -other # On a défini la négation plus tôt.
 	
 	# TODO: Multiplication matricielle/scalaire
-	def TODO(TODO):
+	def __mul__(self, other):
 		if isinstance(other, Matrix):
 			# TODO: Multiplication matricielle.
+
+			# TODO: Vérifier compatibilité.
+			if other.width != self.height:
+				raise ValueError()
+
 			# Rappel de l'algorithme simple pour C = A * B, où A, B sont matrices compatibles (hauteur_A = largeur_B)
 			# C = Matrice(hauteur_A, largeur_B)
+			result = Matrix(self.height, other.width)
 			# Pour i dans [0, hauteur_C[
+			for i in range(result.height):
 				# Pour j dans [0, largeur_C[
+				for j in range(result.width):
 					# Pour k dans [0, largeur_A[
+					for k in range(self.height):
 						# C(i, j) = A(i, k) * B(k, j)
-			pass
+						result[i, j] += self[i, k] * other[k, j]
+			return result
 		elif isinstance(other, numbers.Number):
 			# TODO: Multiplication scalaire.
-			pass
+			return Matrix(self.height, self.width, [other * i for i in self.data])
 		else:
 			raise TypeError()
 
 	# TODO: Multiplication scalaire avec le scalaire à gauche
 
+	def __rmul__(self, other):
+		if isinstance(other, numbers.Number):
+			return self * other
+		else:
+			raise TypeError(other)
+
 	def __abs__(self):
 		return Matrix(self.height, self.width, [abs(e) for e in self.data])
 
 	# TODO: Égalité entre deux matrices
+	def __eq__(self, other):
+		return self is other or (self.height, self.width, self.data) == (other.height, other.width, other.data)
+
+
+	# # Défini implicitement, pas nécessaire.
+	# def __ne__(self, other):
+	# 	return not self == other
 
 	@classmethod
 	def identity(cls, width):
